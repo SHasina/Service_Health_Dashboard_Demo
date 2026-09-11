@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 
 # Pick up upstream Alpine security patches released after this base image
 # tag was built, rather than relying on the tag being re-pulled/rebuilt.
