@@ -84,7 +84,4 @@ scripts/            PowerShell automation for the workflows above
 docs/               Presentation material: demo guide and slide deck
 .github/            CI/CD: lint, tests, security scanning, image build + SBOM
 ```
-
-## License
-
-MIT — see `LICENSE`.
+NSE`.
