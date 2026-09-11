@@ -1,0 +1,10 @@
+# Declarative registry of downstream services checked by the health dashboard.
+# Overridden per-environment via the SERVICES_CONFIG_PATH environment variable
+# (see docker-compose.yml and infra/terraform/manifests for the compose/k8s variants).
+services:
+  - name: user-service
+    url: http://localhost:8001/health
+  - name: order-service
+    url: http://localhost:8002/health
+  - name: payment-service
+    url: http://localhost:8003/health

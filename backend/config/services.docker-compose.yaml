@@ -1,0 +1,7 @@
+services:
+  - name: user-service
+    url: http://user-service:8000/health
+  - name: order-service
+    url: http://order-service:8000/health
+  - name: payment-service
+    url: http://payment-service:8000/health

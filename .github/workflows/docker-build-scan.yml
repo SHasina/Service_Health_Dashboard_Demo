@@ -1,0 +1,58 @@
+name: Docker build and image scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-scan:
+    name: Build, scan, and SBOM (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - service: backend
+            context: backend
+            image: health-dashboard/backend
+          - service: frontend
+            context: frontend
+            image: health-dashboard/frontend
+          - service: mock-service
+            context: services/mock-service
+            image: health-dashboard/mock-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t ${{ matrix.image }}:${{ github.sha }} ${{ matrix.context }}
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          # Fail only on vulnerabilities that actually have a fix available.
+          # The base images carry a handful of HIGH/CRITICAL OS-package CVEs
+          # (util-linux, perl, systemd libraries) that Debian has not shipped
+          # a patch for yet - failing the build on those forever, with no
+          # action anyone can take, trains the team to ignore red builds.
+          # Anything with a real fix still blocks the build. See SECURITY.md.
+          ignore-unfixed: true
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0.24.2
+        with:
+          image: ${{ matrix.image }}:${{ github.sha }}
+          format: spdx-json
+          output-file: sbom-${{ matrix.service }}.spdx.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.service }}
+          path: sbom-${{ matrix.service }}.spdx.json

@@ -1,0 +1,24 @@
+# kind cluster topology for local development and demo.
+#
+# The node image is intentionally left unpinned: kind bundles a default node
+# image with each release that is guaranteed compatible with that release's
+# binary. Pinning an explicit image tag here risks referencing a Kubernetes
+# version the installed kind release cannot bootstrap. CI (.github/workflows)
+# pins the kind binary version itself, which achieves the same reproducibility
+# without hardcoding a node image that may drift out of support.
+#
+# Single control-plane node, not the usual 3-node topology: this host is
+# memory-constrained, and running control-plane + 2 workers + Docker Desktop
+# + Istio's control plane + 5 app pods concurrently was causing sustained
+# OOM crash-looping. kind does not taint a lone control-plane node, so it
+# remains schedulable and the app deploys exactly as it did on 3 nodes -
+# this trades away "multi-node" as a demonstrated property, not correctness.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: health-dashboard
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8080
+        protocol: TCP

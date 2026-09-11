@@ -1,0 +1,28 @@
+# Traffic policy for calls to the backend: outlier detection (circuit
+# breaking) ejects a replica from the load-balancing pool after consecutive
+# 5xx responses, and connection pool limits bound how much load a single
+# client (the frontend) can push at once. TLS mode is explicit here even
+# though PeerAuthentication STRICT already makes ISTIO_MUTUAL the default
+# for in-mesh traffic - documenting the intent rather than relying on it
+# silently.
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: backend
+  namespace: ${namespace}
+spec:
+  host: backend.${namespace}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 50
+      http:
+        http1MaxPendingRequests: 20
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50

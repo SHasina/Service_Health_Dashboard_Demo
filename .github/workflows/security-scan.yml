@@ -1,0 +1,81 @@
+name: Security scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: Secret scanning (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sast:
+    name: SAST (Semgrep + Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/ci
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install bandit==1.7.10
+      - run: bandit -r backend/app services/mock-service/app -ll
+
+  dependency-scan:
+    name: Dependency scanning (SCA)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pip-audit==2.7.3
+      - run: pip-audit -r backend/requirements.txt
+      - run: pip-audit -r services/mock-service/requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - working-directory: frontend
+        # Scoped to production dependencies: the current findings in the
+        # vite/vitest/esbuild dev-tooling chain only affect the local Vite
+        # dev server (not the built, deployed artifact) and are tracked for
+        # upgrade via Dependabot rather than blocking every build on a
+        # dev-only advisory. See SECURITY.md.
+        run: npm audit --omit=dev --audit-level=high
+
+  iac-scan:
+    name: IaC scan (tfsec)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: infra/terraform
+
+  k8s-manifest-lint:
+    name: Kubernetes manifest lint (kube-linter)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: stackrox/kube-linter-action@v1
+        with:
+          directory: infra/terraform/manifests

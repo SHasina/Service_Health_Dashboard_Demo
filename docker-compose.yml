@@ -1,0 +1,40 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      SERVICES_CONFIG_PATH: /app/config/services.docker-compose.yaml
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-http://localhost:8080}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - ./backend/config/services.docker-compose.yaml:/app/config/services.docker-compose.yaml:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      - user-service
+      - order-service
+      - payment-service
+
+  user-service:
+    build: ./services/mock-service
+    environment:
+      MOCK_NAME: user-service
+      MOCK_MODE: healthy
+
+  order-service:
+    build: ./services/mock-service
+    environment:
+      MOCK_NAME: order-service
+      MOCK_MODE: slow
+
+  payment-service:
+    build: ./services/mock-service
+    environment:
+      MOCK_NAME: payment-service
+      MOCK_MODE: healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
