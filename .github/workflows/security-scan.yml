@@ -14,7 +14,7 @@ jobs:
     name: Secret scanning (gitleaks)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2.3.9
@@ -25,7 +25,7 @@ jobs:
     name: SAST (Semgrep + Bandit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Semgrep
         uses: returntocorp/semgrep-action@v1
@@ -42,7 +42,7 @@ jobs:
     name: Dependency scanning (SCA)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -66,7 +66,7 @@ jobs:
     name: IaC scan (tfsec)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: infra/terraform
@@ -75,7 +75,7 @@ jobs:
     name: Kubernetes manifest lint (kube-linter)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: stackrox/kube-linter-action@v1
         with:
           directory: infra/terraform/manifests
