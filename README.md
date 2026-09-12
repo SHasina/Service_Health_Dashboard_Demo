@@ -10,11 +10,20 @@ reason in real time.
 | order-service    | DOWN   | Timeout  |
 | payment-service  | UP     | 85 ms    |
 
+The order-service is set to unhealthy, this can be changed by settimg the environment variable for the live-demo,
+kubectl set env deployment/order-service -n health-dashboard MOCK_MODE=healthy
+
+Istio services can be found using the below command,
+kubectl get gateway,virtualservice,destinationrule,serviceentry,sidecar,peerauthentication,authorizationpolicy,requestauthentication,envoyfilter,wasmplugin -A
+
+Command to run the trivy image scanning test from the local,
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v trivy-cache:/root/.cache/ aquasec/trivy:latest image --severity HIGH,CRITICAL --timeout 10m health-dashboard/backend:local
+
 This repository goes beyond the minimal exercise to demonstrate a production-style DevSecOps
 delivery pipeline: containerized services, a local Kubernetes deployment (kind) behind an Istio
 service mesh, infrastructure managed with Terraform, and a shift-left security pipeline in GitHub
 Actions. See `ARCHITECTURE.md` for design decisions, `SECURITY.md` for the shift-left/security
-narrative, and `docs/DEMO_GUIDE.md` for a full presentation walkthrough (business context,
+narrative, and `Service-Health-Dashboard-Deck.pptx` for a full presentation walkthrough (business context,
 architecture, a file-by-file codebase tour, and a PowerPoint version).
 
 ## Prerequisites
