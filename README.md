@@ -11,9 +11,11 @@ reason in real time.
 | payment-service  | UP     | 85 ms    |
 
 The order-service is set to unhealthy, this can be changed by settimg the environment variable for the live-demo,
+
 kubectl set env deployment/order-service -n health-dashboard MOCK_MODE=healthy
 
 Istio services can be found using the below command,
+
 kubectl get gateway,virtualservice,destinationrule,serviceentry,sidecar,peerauthentication,authorizationpolicy,requestauthentication,envoyfilter,wasmplugin -A
 
 Command to run the trivy image scanning test from the local,
