@@ -1,10 +1,10 @@
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 COPY requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 # Pick up upstream Debian security patches released after this base image
 # tag was built, rather than relying on the tag being re-pulled/rebuilt.
